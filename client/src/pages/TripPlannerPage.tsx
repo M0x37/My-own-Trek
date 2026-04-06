@@ -18,12 +18,9 @@ import MemoriesPanel from '../components/Memories/MemoriesPanel'
 import ReservationsPanel from '../components/Planner/ReservationsPanel'
 import PackingListPanel from '../components/Packing/PackingListPanel'
 import TodoListPanel from '../components/Todo/TodoListPanel'
-import FileManager from '../components/Files/FileManager'
-import BudgetPanel from '../components/Budget/BudgetPanel'
-import CollabPanel from '../components/Collab/CollabPanel'
 import Navbar from '../components/Layout/Navbar'
 import { useToast } from '../components/shared/Toast'
-import { Map, X, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Ticket, PackageCheck, Wallet, FolderOpen, Camera, Users } from 'lucide-react'
+import { Map, X, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Ticket, PackageCheck, Camera } from 'lucide-react'
 import { useTranslation } from '../i18n'
 import { addonsApi, accommodationsApi, authApi, tripsApi, assignmentsApi, mapsApi } from '../api/client'
 import ConfirmDialog from '../components/shared/ConfirmDialog'
@@ -126,10 +123,7 @@ export default function TripPlannerPage(): React.ReactElement | null {
     { id: 'plan', label: t('trip.tabs.plan'), icon: Map },
     { id: 'buchungen', label: t('trip.tabs.reservations'), shortLabel: t('trip.tabs.reservationsShort'), icon: Ticket },
     ...(enabledAddons.packing ? [{ id: 'listen', label: t('trip.tabs.lists'), shortLabel: t('trip.tabs.listsShort'), icon: PackageCheck }] : []),
-    ...(enabledAddons.budget ? [{ id: 'finanzplan', label: t('trip.tabs.budget'), icon: Wallet }] : []),
-    ...(enabledAddons.documents ? [{ id: 'dateien', label: t('trip.tabs.files'), icon: FolderOpen }] : []),
     ...(enabledAddons.memories ? [{ id: 'memories', label: t('memories.title'), icon: Camera }] : []),
-    ...(enabledAddons.collab ? [{ id: 'collab', label: t('admin.addons.catalog.collab.name'), icon: Users }] : []),
   ]
 
   const [activeTab, setActiveTab] = useState<string>(() => {
@@ -148,8 +142,6 @@ export default function TripPlannerPage(): React.ReactElement | null {
   const handleTabChange = (tabId: string): void => {
     setActiveTab(tabId)
     sessionStorage.setItem(`trip-tab-${tripId}`, tabId)
-    if (tabId === 'finanzplan') tripActions.loadBudgetItems?.(tripId)
-    if (tabId === 'dateien' && (!files || files.length === 0)) tripActions.loadFiles?.(tripId)
   }
   const { leftWidth, rightWidth, leftCollapsed, rightCollapsed, setLeftCollapsed, setRightCollapsed, startResizeLeft, startResizeRight } = useResizablePanels()
   const { selectedPlaceId, selectedAssignmentId, setSelectedPlaceId, selectAssignment } = usePlaceSelection()
@@ -912,38 +904,9 @@ export default function TripPlannerPage(): React.ReactElement | null {
           </div>
         )}
 
-        {activeTab === 'finanzplan' && (
-          <div style={{ height: '100%', overflowY: 'auto', overscrollBehavior: 'contain', maxWidth: 1800, margin: '0 auto', width: '100%', padding: '8px 0' }}>
-            <BudgetPanel tripId={tripId} tripMembers={tripMembers} />
-          </div>
-        )}
-
-        {activeTab === 'dateien' && (
-          <div style={{ height: '100%', overflow: 'hidden', overscrollBehavior: 'contain' }}>
-            <FileManager
-              files={files || []}
-              onUpload={(fd) => tripActions.addFile(tripId, fd)}
-              onDelete={(id) => tripActions.deleteFile(tripId, id)}
-              onUpdate={(id, data) => tripActions.loadFiles(tripId)}
-              places={places}
-              days={days}
-              assignments={assignments}
-              reservations={reservations}
-              tripId={tripId}
-              allowedFileTypes={allowedFileTypes}
-            />
-          </div>
-        )}
-
         {activeTab === 'memories' && (
           <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
             <MemoriesPanel tripId={Number(tripId)} startDate={trip?.start_date || null} endDate={trip?.end_date || null} />
-          </div>
-        )}
-
-        {activeTab === 'collab' && (
-          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-            <CollabPanel tripId={tripId} tripMembers={tripMembers} />
           </div>
         )}
       </div>

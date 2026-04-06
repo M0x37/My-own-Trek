@@ -57,14 +57,14 @@ interface TranslationContextValue {
   locale: string
 }
 
-const TranslationContext = createContext<TranslationContextValue>({ t: (k: string) => k, language: 'en', locale: 'en-US' })
+const TranslationContext = createContext<TranslationContextValue>({ t: (k: string) => k, language: 'de', locale: 'de-DE' })
 
 interface TranslationProviderProps {
   children: ReactNode
 }
 
 export function TranslationProvider({ children }: TranslationProviderProps) {
-  const language = useSettingsStore((s) => s.settings.language) || 'en'
+  const language = useSettingsStore((s) => s.settings.language) || 'de'
 
   useEffect(() => {
     document.documentElement.lang = language
@@ -72,8 +72,8 @@ export function TranslationProvider({ children }: TranslationProviderProps) {
   }, [language])
 
   const value = useMemo((): TranslationContextValue => {
-    const strings = translations[language] || translations.en
-    const fallback = translations.en
+    const strings = translations[language] || translations.de
+    const fallback = translations.de
 
     function t(key: string, params?: Record<string, string | number>): string {
       let val: string = (strings[key] ?? fallback[key] ?? key) as string
